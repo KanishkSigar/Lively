@@ -1,0 +1,5 @@
+bind i:int is 0;
+cycle (i < 10) {
+	i is i + 1;
+}
+emit i;

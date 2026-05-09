@@ -1,0 +1,23 @@
+bind x:int is 10;
+bind y:int is 2 + 3 * (4 - 1);
+bind aliveflag:bool is alive;
+
+x is x / y;
+
+check (x >= 5) {
+	emit x;
+} otherwise {
+	emit 0;
+}
+
+cycle (x != 0) {
+	x is x - 1;
+}
+
+forge clamp(n:int, limit:int): int {
+	check (n <= limit) {
+		yield n;
+	} otherwise {
+		yield limit;
+	}
+}
