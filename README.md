@@ -1,26 +1,31 @@
-# LiveLy Programming Language
+# LiveLy
 
-LiveLy is a custom statically-typed procedural programming language 
-with its own compiler, virtual machine, and JIT execution engine.
+LiveLy is a statically typed procedural language with a compiler pipeline that lowers source code into TAC, bytecode, and runtime execution machinery. The repository contains the lexer, parser, semantic analyzer, IR generation, bytecode generator, VM, and related tests.
 
-## Features
-- Custom language design
-- Compiler pipeline (Lexer → Parser → Semantic → TAC → Bytecode)
-- Three-Address Code intermediate representation
-- Stack-based bytecode generation
-- Stack-based Virtual Machine (planned)
-- JIT compilation (planned)
+## Highlights
+- Source language with explicit typing and structured control flow
+- Compiler pipeline: lexer -> parser -> AST -> semantic analysis -> TAC -> bytecode
+- Diagnostics across the compilation stages for easier debugging
+- Example programs and negative test cases under `examples/`
 
-## Current Pipeline (v0.4)
+## Quick Start
 
+### Requirements
+- CMake 3.25+
+- Ninja 1.11+
+- A C++17-capable compiler such as GCC 11+, Clang 14+, or MSVC 19.3+
+
+### Build and test
+From the project root, run:
+
+```powershell
+cmake --workflow --preset ci
 ```
-Source (.lv) → Lexer → Parser → AST → Semantic → TAC (IR) → Bytecode
-```
 
-All phases produce diagnostic output showing tokens, AST, TAC instructions,
-and bytecode with resolved jump targets.
+That single command configures the project, builds it, and runs the full CTest suite.
 
 ## Example
+
 ```lively
 bind x:int is 10;
 bind y:int is 2 + 3 * (4 - 1);
@@ -36,23 +41,7 @@ cycle (x != 0) {
 }
 ```
 
-## Tooling Requirements
-- CMake: 3.25+
-- Ninja: 1.11+
-- C++ compiler with C++17 support (GCC 11+, Clang 14+, or MSVC 19.3+)
-- VS Code extension (recommended): CMake Tools (ms-vscode.cmake-tools), latest stable
-
-## Single Command Build + Test
-From project root, run:
-
-```powershell
-cmake --workflow --preset ci
-```
-
-This command performs configure + build + test in one step.
-All 9 CTest tests (lexer, parser, semantic, TAC, bytecode) run automatically.
-
-## Test Suite
+## Test Coverage
 
 | Test | Validates |
 |------|-----------|
@@ -66,6 +55,13 @@ All 9 CTest tests (lexer, parser, semantic, TAC, bytecode) run automatically.
 | `bytecode_hello` | Bytecode has PUSH_CONST, STORE, PRINT |
 | `bytecode_loop` | Bytecode jump instructions |
 
-## VS Code Setup
-Project settings enforce CMake Presets mode.
-Open the folder in VS Code and run the default workflow or test from CMake Tools.
+## Repository Layout
+
+- `src/` compiler, IR, VM, and support code
+- `tests/` lexer and VM tests
+- `examples/` sample LiveLy programs
+- `docs/` design notes and language details
+
+## VS Code
+
+The project is configured for CMake Presets mode. Open the folder in VS Code and use CMake Tools to build or run the workflow preset.
