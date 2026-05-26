@@ -59,6 +59,21 @@ From project root, run:
 cmake --workflow --preset ci
 ```
 
+If `cmake` is not on your PATH (common right after a fresh winget install,
+because already-open terminals cache the old environment), load the dev
+environment first:
+
+```cmd
+:: in cmd
+dev
+
+:: in PowerShell — note the leading dot (dot-source so PATH persists)
+. .\dev.ps1
+```
+
+`dev.bat` / `dev.ps1` prepend the CMake, Ninja, and WinLibs paths to the
+current session's PATH and warn about any missing tool.
+
 This command performs configure + build + test in one step.
 All 10 CTest tests (lexer, parser, semantic, TAC, bytecode, VM) run automatically.
 
