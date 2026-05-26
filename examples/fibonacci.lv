@@ -1,0 +1,16 @@
+bind a:int is 0;
+bind b:int is 1;
+bind tmp:int is 0;
+bind count:int is 0;
+bind n:int is 10;
+
+emit a;
+emit b;
+
+cycle (count < n) {
+    tmp is a + b;
+    a is b;
+    b is tmp;
+    emit b;
+    count is count + 1;
+}

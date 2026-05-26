@@ -1,0 +1,16 @@
+bind n:int is 10;
+bind i:int is 1;
+bind sum:int is 0;
+
+cycle (i <= n) {
+    sum is sum + i;
+    i is i + 1;
+}
+
+emit sum;
+
+check (sum >= 50) {
+    emit 1;
+} otherwise {
+    emit 0;
+}

@@ -1,31 +1,36 @@
-# LiveLy
+# LiveLy Programming Language
 
-LiveLy is a statically typed procedural language with a compiler pipeline that lowers source code into TAC, bytecode, and runtime execution machinery. The repository contains the lexer, parser, semantic analyzer, IR generation, bytecode generator, VM, and related tests.
+LiveLy is a custom statically-typed procedural programming language with
+its own compiler and stack-based virtual machine. A JIT execution engine
+is planned for a future version.
 
-## Highlights
-- Source language with explicit typing and structured control flow
-- Compiler pipeline: lexer -> parser -> AST -> semantic analysis -> TAC -> bytecode
-- Diagnostics across the compilation stages for easier debugging
-- Example programs and negative test cases under `examples/`
+## Features
+- Custom statically-typed language with `int` and `bool` primitives
+- Full compiler front end: lexer, parser, semantic analyzer
+- Three-Address Code intermediate representation
+- Stack-based bytecode with resolved jump targets
+- Stack-based Virtual Machine that executes the bytecode
+- JIT compilation (planned — not yet implemented)
 
-## Quick Start
+## Current Pipeline (v0.4)
 
-### Requirements
-- CMake 3.25+
-- Ninja 1.11+
-- A C++17-capable compiler such as GCC 11+, Clang 14+, or MSVC 19.3+
-
-### Build and test
-From the project root, run:
-
-```powershell
-cmake --workflow --preset ci
+```
+Source (.lv) → Lexer → Parser → AST → Semantic → TAC (IR) → Bytecode → VM
 ```
 
-That single command configures the project, builds it, and runs the full CTest suite.
+All phases produce diagnostic output: tokens, AST, semantic check, TAC
+instructions, bytecode with resolved jump targets, and the VM's runtime
+output from `emit` statements.
+
+## Current Limitations
+- `forge` functions parse and type-check but are not yet lowered to bytecode
+  (no `CALL`/`RET` opcodes), so function calls do not execute at runtime.
+- No strings, floats, or arrays.
+- No unary or logical operators (`!`, `&&`, `||`, unary `-`).
+- No source-level comments.
+- JIT backend is a placeholder; only VM execution is available.
 
 ## Example
-
 ```lively
 bind x:int is 10;
 bind y:int is 2 + 3 * (4 - 1);
@@ -41,7 +46,23 @@ cycle (x != 0) {
 }
 ```
 
-## Test Coverage
+## Tooling Requirements
+- CMake: 3.25+
+- Ninja: 1.11+
+- C++ compiler with C++17 support (GCC 11+, Clang 14+, or MSVC 19.3+)
+- VS Code extension (recommended): CMake Tools (ms-vscode.cmake-tools), latest stable
+
+## Single Command Build + Test
+From project root, run:
+
+```powershell
+cmake --workflow --preset ci
+```
+
+This command performs configure + build + test in one step.
+All 10 CTest tests (lexer, parser, semantic, TAC, bytecode, VM) run automatically.
+
+## Test Suite
 
 | Test | Validates |
 |------|-----------|
@@ -54,14 +75,22 @@ cycle (x != 0) {
 | `tac_loop` | TAC control flow (LABEL, IF_FALSE, GOTO) |
 | `bytecode_hello` | Bytecode has PUSH_CONST, STORE, PRINT |
 | `bytecode_loop` | Bytecode jump instructions |
+| `vm_runtime` | VM correctly executes arithmetic + control flow |
 
-## Repository Layout
+## Running Your Own Programs
 
-- `src/` compiler, IR, VM, and support code
-- `tests/` lexer and VM tests
-- `examples/` sample LiveLy programs
-- `docs/` design notes and language details
+After building, run any `.lv` source file through the full pipeline:
 
-## VS Code
+```powershell
+.\build\lively.exe examples\hello.lv
+.\build\lively.exe examples\fibonacci.lv
+.\build\lively.exe examples\loop_test.lv
+```
 
-The project is configured for CMake Presets mode. Open the folder in VS Code and use CMake Tools to build or run the workflow preset.
+The compiler prints diagnostics for every phase and then executes the
+program via the VM. For `examples\fibonacci.lv`, the VM prints the first
+12 Fibonacci numbers: `0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89`.
+
+## VS Code Setup
+Project settings enforce CMake Presets mode.
+Open the folder in VS Code and run the default workflow or test from CMake Tools.
