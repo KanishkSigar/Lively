@@ -135,3 +135,7 @@ Open the folder in VS Code and run the default workflow or test from CMake Tools
 ## License
 
 Released under the [MIT License](LICENSE).
+
+## Acknowledgments
+
+Developed with the assistance of AI-powered coding tools (Claude Code) for parts of the implementation and documentation.
