@@ -1,8 +1,17 @@
 # LiveLy Programming Language
 
+> A custom statically-typed procedural language with its own compiler and stack-based virtual machine — built from scratch in C++.
+
+[![C++](https://img.shields.io/badge/C++-17-00599C?logo=cplusplus&logoColor=white)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.25+-064F8C?logo=cmake&logoColor=white)](https://cmake.org/)
+[![Tests](https://img.shields.io/badge/CTest-10%20passing-2ea44f)](#test-suite)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 LiveLy is a custom statically-typed procedural programming language with
-its own compiler and stack-based virtual machine. A JIT execution engine
-is planned for a future version.
+its own compiler and stack-based virtual machine. Source code runs through a
+complete front end (lexer → parser → semantic analysis), lowers to a
+Three-Address Code IR, compiles to bytecode, and executes on a custom VM.
+A JIT execution engine is planned for a future version.
 
 ## Features
 - Custom statically-typed language with `int` and `bool` primitives
@@ -45,6 +54,19 @@ cycle (x != 0) {
     x is x - 1;
 }
 ```
+
+### Language at a glance
+
+LiveLy uses its own keywords rather than the usual C-family ones:
+
+| LiveLy | Meaning | Equivalent |
+|---|---|---|
+| `bind x:int is 10;` | Typed variable declaration + assignment | `int x = 10;` |
+| `x is x - 1;` | Reassignment | `x = x - 1;` |
+| `check (...) { } otherwise { }` | Conditional | `if / else` |
+| `cycle (...) { }` | Loop | `while` |
+| `emit x;` | Print to output | `print(x)` |
+| `forge` | Function definition (parses; not yet executable) | `function` |
 
 ## Tooling Requirements
 - CMake: 3.25+
@@ -109,3 +131,7 @@ program via the VM. For `examples\fibonacci.lv`, the VM prints the first
 ## VS Code Setup
 Project settings enforce CMake Presets mode.
 Open the folder in VS Code and run the default workflow or test from CMake Tools.
+
+## License
+
+Released under the [MIT License](LICENSE).
