@@ -32,8 +32,7 @@ instructions, bytecode with resolved jump targets, and the VM's runtime
 output from `emit` statements.
 
 ## Current Limitations
-- `forge` functions parse and type-check but are not yet lowered to bytecode
-  (no `CALL`/`RET` opcodes), so function calls do not execute at runtime.
+- Callable `forge` functions require an explicit return type and must reach a `yield`.
 - No strings, floats, or arrays.
 - No unary or logical operators (`!`, `&&`, `||`, unary `-`).
 - No source-level comments.
@@ -66,7 +65,7 @@ LiveLy uses its own keywords rather than the usual C-family ones:
 | `check (...) { } otherwise { }` | Conditional | `if / else` |
 | `cycle (...) { }` | Loop | `while` |
 | `emit x;` | Print to output | `print(x)` |
-| `forge` | Function definition (parses; not yet executable) | `function` |
+| `forge` | Typed function definition | `function` |
 
 ## Tooling Requirements
 - CMake: 3.25+

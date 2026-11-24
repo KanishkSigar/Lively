@@ -78,6 +78,11 @@ std::string tacOpToString(TACOp op) {
         case TACOp::LABEL:    return "LABEL";
         case TACOp::GOTO:     return "GOTO";
         case TACOp::IF_FALSE: return "IF_FALSE";
+        case TACOp::ARG: return "ARG";
+        case TACOp::PARAM: return "PARAM";
+        case TACOp::CALL: return "CALL";
+        case TACOp::RET: return "RET";
+        case TACOp::MISSING_RETURN: return "MISSING_RETURN";
         case TACOp::EMIT:     return "EMIT";
     }
     return "UNKNOWN";
@@ -101,6 +106,9 @@ std::string opCodeToString(OpCode op) {
         case OpCode::NEQ:           return "NEQ";
         case OpCode::JUMP:          return "JUMP";
         case OpCode::JUMP_IF_FALSE: return "JUMP_IF_FALSE";
+        case OpCode::CALL: return "CALL";
+        case OpCode::RET: return "RET";
+        case OpCode::MISSING_RETURN: return "MISSING_RETURN";
         case OpCode::PRINT:         return "PRINT";
     }
     return "UNKNOWN";

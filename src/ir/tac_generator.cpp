@@ -1,12 +1,16 @@
 #include "tac_generator.h"
-#include <iostream>
+#include <stdexcept>
 
 // ==============================
 // Helpers
 // ==============================
 
 std::string TACGenerator::newTemp() {
-    return "t" + std::to_string(tempCounter++);
+    return (inFunction ? "@$t" : "$t") + std::to_string(tempCounter++);
+}
+
+std::string TACGenerator::variableSlot(const std::string& name) const {
+    return localNames.count(name) ? "@" + name : name;
 }
 
 std::string TACGenerator::newLabel() {
@@ -23,6 +27,8 @@ std::vector<TACInstruction> TACGenerator::generate(
     instructions.clear();
     tempCounter = 0;
     labelCounter = 0;
+    inFunction = false;
+    localNames.clear();
 
     for (const auto& stmt : statements) {
         generateStatement(stmt.get());
@@ -40,13 +46,14 @@ void TACGenerator::generateStatement(Statement* stmt) {
     // VarDecl
     if (auto var = dynamic_cast<VarDecl*>(stmt)) {
         std::string value = generateExpression(var->value.get());
-        instructions.emplace_back(TACOp::ASSIGN, var->name, value);
+        if (inFunction) localNames.insert(var->name);
+        instructions.emplace_back(TACOp::ASSIGN, variableSlot(var->name), value);
     }
 
     // Assignment
     else if (auto assign = dynamic_cast<Assignment*>(stmt)) {
         std::string value = generateExpression(assign->value.get());
-        instructions.emplace_back(TACOp::ASSIGN, assign->name, value);
+        instructions.emplace_back(TACOp::ASSIGN, variableSlot(assign->name), value);
     }
 
     // Emit
@@ -96,14 +103,25 @@ void TACGenerator::generateStatement(Statement* stmt) {
         instructions.emplace_back(TACOp::LABEL, endLabel);
     }
 
-    // FunctionDecl (not yet lowered to IR — skip with warning)
-    else if (dynamic_cast<FunctionDecl*>(stmt)) {
-        std::cerr << "[IR Warning] FunctionDecl skipped — not yet supported in TAC.\n";
+    else if (auto fn = dynamic_cast<FunctionDecl*>(stmt)) {
+        const auto after = newLabel();
+        instructions.emplace_back(TACOp::GOTO, after);
+        instructions.emplace_back(TACOp::LABEL, "function:" + fn->name);
+        inFunction = true;
+        for (auto it = fn->parameters.rbegin(); it != fn->parameters.rend(); ++it) {
+            localNames.insert(it->first);
+            instructions.emplace_back(TACOp::PARAM, variableSlot(it->first));
+        }
+        for (auto& child : fn->body) generateStatement(child.get());
+        instructions.emplace_back(TACOp::MISSING_RETURN, fn->name);
+        localNames.clear();
+        inFunction = false;
+        instructions.emplace_back(TACOp::LABEL, after);
     }
 
-    // ReturnStmt (not yet lowered to IR — skip with warning)
-    else if (dynamic_cast<ReturnStmt*>(stmt)) {
-        std::cerr << "[IR Warning] ReturnStmt skipped — not yet supported in TAC.\n";
+    else if (auto ret = dynamic_cast<ReturnStmt*>(stmt)) {
+        const auto value = generateExpression(ret->value.get());
+        instructions.emplace_back(TACOp::RET, "", value);
     }
 }
 
@@ -118,12 +136,24 @@ std::string TACGenerator::generateExpression(Expression* expr) {
     }
 
     if (auto var = dynamic_cast<VariableExpr*>(expr)) {
-        return var->name;
+        return variableSlot(var->name);
+    }
+
+    if (auto call = dynamic_cast<CallExpr*>(expr)) {
+        for (const auto& argument : call->arguments) {
+            const auto value = generateExpression(argument.get());
+            instructions.emplace_back(TACOp::ARG, "", value);
+        }
+        const auto result = newTemp();
+        instructions.emplace_back(TACOp::CALL, result, "function:" + call->name);
+        return result;
     }
 
     if (auto bin = dynamic_cast<BinaryExpr*>(expr)) {
 
         std::string left = generateExpression(bin->left.get());
+        const auto savedLeft = newTemp();
+        instructions.emplace_back(TACOp::ASSIGN, savedLeft, left);
         std::string right = generateExpression(bin->right.get());
 
         std::string temp = newTemp();
@@ -142,7 +172,7 @@ std::string TACGenerator::generateExpression(Expression* expr) {
         else if (bin->op == "!=") op = TACOp::NEQ;
         else throw std::runtime_error("Unknown operator");
 
-        instructions.emplace_back(op, temp, left, right);
+        instructions.emplace_back(op, temp, savedLeft, right);
         return temp;
     }
 

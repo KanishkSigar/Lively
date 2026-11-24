@@ -106,6 +106,14 @@ public:
         : condition(std::move(condition)) {}
 };
 
+class CallExpr : public Expression {
+public:
+    std::string name;
+    std::vector<std::unique_ptr<Expression>> arguments;
+
+    explicit CallExpr(std::string name) : name(std::move(name)) {}
+};
+
 // Return Statement
 class ReturnStmt : public Statement {
 public:

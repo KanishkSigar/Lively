@@ -10,6 +10,14 @@ private:
     std::vector<int> stack;
     std::unordered_map<std::string, int> memory;
 
+    struct CallFrame {
+        int returnIp;
+        std::unordered_map<std::string, int> locals;
+    };
+    std::vector<CallFrame> frames;
+
+    std::unordered_map<std::string, int>& slots(const std::string& operand);
+
     int ip = 0; // instruction pointer
 
 public:

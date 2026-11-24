@@ -1,0 +1,12 @@
+forge factorial(n:int): int {
+    check (n <= 1) {
+        yield 1;
+    }
+    yield n * factorial(n - 1);
+}
+
+forge add(a:int, b:int): int {
+    yield a + b;
+}
+
+emit add(factorial(5), factorial(3));

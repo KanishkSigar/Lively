@@ -144,7 +144,11 @@ private:
     // ---- Expression dispatchers ----
 
     static void printExpression(const Expression* expr, int level) {
-        if (auto* lit = dynamic_cast<const LiteralExpr*>(expr)) {
+        if (auto* call = dynamic_cast<const CallExpr*>(expr)) {
+            std::cout << indent(level) << "Call: " << call->name << "\n";
+            for (const auto& argument : call->arguments)
+                printExpression(argument.get(), level + 1);
+        } else if (auto* lit = dynamic_cast<const LiteralExpr*>(expr)) {
             std::cout << indent(level) << "Literal: " << lit->value << "\n";
         } else if (auto* var = dynamic_cast<const VariableExpr*>(expr)) {
             std::cout << indent(level) << "Variable: " << var->name << "\n";

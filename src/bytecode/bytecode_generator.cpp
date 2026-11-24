@@ -33,7 +33,12 @@ int BytecodeGenerator::bytecodeCountForTAC(TACOp op) {
         case TACOp::IF_FALSE: return 2;  // emitLoad + JUMP_IF_FALSE
         case TACOp::GOTO:     return 1;  // JUMP
         case TACOp::EMIT:     return 2;  // emitLoad + PRINT
-        case TACOp::LABEL:    return 0;
+        case TACOp::ARG: return 1;
+        case TACOp::PARAM: return 1;
+        case TACOp::CALL: return 2;
+        case TACOp::RET: return 2;
+        case TACOp::MISSING_RETURN: return 1;
+        case TACOp::LABEL: return 0;
         default:              return 0;
     }
 }
@@ -121,6 +126,24 @@ void BytecodeGenerator::secondPass(const std::vector<TACInstruction>& tac) {
         case TACOp::GOTO:
             instructions.emplace_back(OpCode::JUMP,
                 std::to_string(labelMap[instr.result]));
+            break;
+
+        case TACOp::ARG:
+            emitLoad(instr.arg1);
+            break;
+        case TACOp::PARAM:
+            instructions.emplace_back(OpCode::STORE, instr.result);
+            break;
+        case TACOp::CALL:
+            instructions.emplace_back(OpCode::CALL, std::to_string(labelMap.at(instr.arg1)));
+            instructions.emplace_back(OpCode::STORE, instr.result);
+            break;
+        case TACOp::RET:
+            emitLoad(instr.arg1);
+            instructions.emplace_back(OpCode::RET);
+            break;
+        case TACOp::MISSING_RETURN:
+            instructions.emplace_back(OpCode::MISSING_RETURN, instr.result);
             break;
 
         case TACOp::EMIT:

@@ -13,6 +13,7 @@ enum class OpCode {
     JUMP,
     JUMP_IF_FALSE,
 
+    CALL, RET, MISSING_RETURN,
     PRINT
 };
 

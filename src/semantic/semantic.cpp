@@ -46,6 +46,13 @@ std::string SemanticAnalyzer::lookup(const std::string& name) {
 void SemanticAnalyzer::analyze(
     const std::vector<std::unique_ptr<Statement>>& statements) {
 
+    functions.clear();
+    for (const auto& stmt : statements) {
+        if (auto fn = dynamic_cast<const FunctionDecl*>(stmt.get())) {
+            if (!functions.emplace(fn->name, fn).second)
+                error("Duplicate function: " + fn->name);
+        }
+    }
     for (const auto& stmt : statements) {
         analyzeStatement(stmt.get());
     }
@@ -117,7 +124,8 @@ void SemanticAnalyzer::analyzeStatement(Statement* stmt) {
 
         std::string valueType = analyzeExpression(ret->value.get());
 
-        if (!currentReturnType.empty() && valueType != currentReturnType) {
+        if (currentReturnType.empty()) error("yield outside a function");
+        if (valueType != currentReturnType) {
             error("Return type mismatch: expected " + currentReturnType
                   + ", got " + valueType);
         }
@@ -126,9 +134,9 @@ void SemanticAnalyzer::analyzeStatement(Statement* stmt) {
     // Function Declaration: forge name(params): returnType { body }
     else if (auto fn = dynamic_cast<FunctionDecl*>(stmt)) {
 
-        // Register the function name in the current scope
-        // (stored as type "func" for now — future: full signature)
-        declare(fn->name, "func");
+        const auto entry = functions.find(fn->name);
+        if (entry == functions.end() || entry->second != fn)
+            error("Functions must be declared at the top level");
 
         // Create a new scope for the function body
         pushScope();
@@ -168,6 +176,20 @@ std::string SemanticAnalyzer::analyzeExpression(Expression* expr) {
     // Variable: x, y, name
     else if (auto var = dynamic_cast<VariableExpr*>(expr)) {
         return lookup(var->name);
+    }
+
+    else if (auto call = dynamic_cast<CallExpr*>(expr)) {
+        const auto entry = functions.find(call->name);
+        if (entry == functions.end()) error("Unknown function: " + call->name);
+        const auto& fn = *entry->second;
+        if (call->arguments.size() != fn.parameters.size())
+            error("Wrong number of arguments to " + call->name);
+        for (size_t i = 0; i < fn.parameters.size(); ++i) {
+            if (analyzeExpression(call->arguments[i].get()) != fn.parameters[i].second)
+                error("Wrong type for argument " + std::to_string(i + 1) + " to " + call->name);
+        }
+        if (fn.returnType == "void") error("Function requires a return type to be called: " + call->name);
+        return fn.returnType;
     }
 
     // Binary Expression: a + b, x >= y, a == b

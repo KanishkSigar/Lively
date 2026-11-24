@@ -130,3 +130,5 @@ add_custom_target(check
     DEPENDS lively
     COMMENT "Running all CTest tests"
 )
+add_test(NAME function_calls COMMAND lively ${CMAKE_CURRENT_SOURCE_DIR}/examples/functions.lv)
+set_tests_properties(function_calls PROPERTIES PASS_REGULAR_EXPRESSION "126")

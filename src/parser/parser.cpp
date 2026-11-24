@@ -304,7 +304,16 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
     }
 
     if (match(TokenType::IDENTIFIER)) {
-        return std::make_unique<VariableExpr>(previous().value);
+        auto name = previous().value;
+        if (!match(TokenType::LPAREN)) return std::make_unique<VariableExpr>(name);
+        auto call = std::make_unique<CallExpr>(name);
+        if (peek().type != TokenType::RPAREN) {
+            do {
+                call->arguments.push_back(parseExpression());
+            } while (match(TokenType::COMMA));
+        }
+        consume(TokenType::RPAREN, "Expected ')' after arguments");
+        return call;
     }
 
     if (match(TokenType::LPAREN)) {

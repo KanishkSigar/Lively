@@ -11,6 +11,7 @@ enum class TACOp {
     GOTO,
     IF_FALSE,
 
+    ARG, PARAM, CALL, RET, MISSING_RETURN,
     EMIT
 };
 

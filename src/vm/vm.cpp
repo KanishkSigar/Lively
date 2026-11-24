@@ -31,6 +31,11 @@ int VM::pop() {
 // Resolve Operand
 // ==============================
 
+std::unordered_map<std::string, int>& VM::slots(const std::string& operand) {
+    if (!operand.empty() && operand.front() == '@') return frames.at(frames.size() - 1).locals;
+    return memory;
+}
+
 int VM::resolveValue(const std::string& operand) {
     if (operand.empty()) return 0;
 
@@ -40,11 +45,12 @@ int VM::resolveValue(const std::string& operand) {
     }
 
     // Otherwise variable
-    if (memory.find(operand) == memory.end()) {
+    auto& values = slots(operand);
+    if (values.find(operand) == values.end()) {
         throw std::runtime_error("Undefined variable: " + operand);
     }
 
-    return memory[operand];
+    return values.at(operand);
 }
 
 // ==============================
@@ -79,7 +85,7 @@ void VM::run() {
 
         case OpCode::STORE: {
             int value = pop();
-            memory[instr.operand] = value;
+            slots(instr.operand)[instr.operand] = value;
             break;
         }
 
@@ -111,6 +117,7 @@ void VM::run() {
         case OpCode::DIV: {
             int b = pop();
             int a = pop();
+            if (b == 0) throw std::runtime_error("Division by zero");
             push(a / b);
             break;
         }
@@ -164,6 +171,19 @@ void VM::run() {
         // =========================
         // Control Flow
         // =========================
+
+        case OpCode::CALL:
+            if (frames.size() >= 1024) throw std::runtime_error("Call stack limit exceeded");
+            frames.push_back({ip + 1, {}});
+            ip = std::stoi(instr.operand);
+            continue;
+        case OpCode::RET:
+            if (frames.empty()) throw std::runtime_error("Return outside a function");
+            ip = frames.back().returnIp;
+            frames.pop_back();
+            continue;
+        case OpCode::MISSING_RETURN:
+            throw std::runtime_error("Function completed without yielding: " + instr.operand);
 
         case OpCode::JUMP:
             ip = std::stoi(instr.operand);

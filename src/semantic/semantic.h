@@ -14,6 +14,7 @@ private:
     // Track the expected return type when inside a function body.
     // Empty string means "not inside any function".
     std::string currentReturnType;
+    std::unordered_map<std::string, const FunctionDecl*> functions;
 
 public:
     SemanticAnalyzer();
