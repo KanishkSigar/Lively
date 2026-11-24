@@ -130,7 +130,7 @@ std::string readFile(const std::string& path) {
 // Source → Lexer → Parser (AST) → Semantic → TAC (IR) → Bytecode
 int main(int argc, char* argv[]) {
     std::cout << "====================================\n";
-    std::cout << "   LiveLy Compiler v0.4             \n";;
+    std::cout << "   LiveLy Compiler v0.5             \n";
     std::cout << "====================================\n";
 
     if (argc < 2) {

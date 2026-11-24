@@ -4,7 +4,7 @@
 
 [![C++](https://img.shields.io/badge/C++-17-00599C?logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/CMake-3.25+-064F8C?logo=cmake&logoColor=white)](https://cmake.org/)
-[![Tests](https://img.shields.io/badge/CTest-10%20passing-2ea44f)](#test-suite)
+[![Tests](https://img.shields.io/badge/CTest-11%20passing-2ea44f)](#test-suite)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 LiveLy is a custom statically-typed procedural programming language with
@@ -21,7 +21,7 @@ A JIT execution engine is planned for a future version.
 - Stack-based Virtual Machine that executes the bytecode
 - JIT compilation (planned — not yet implemented)
 
-## Current Pipeline (v0.4)
+## Current Pipeline (v0.5)
 
 ```
 Source (.lv) → Lexer → Parser → AST → Semantic → TAC (IR) → Bytecode → VM
